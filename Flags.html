@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Flags Explorer | By Danyal</title>
+    <style>
+        /* --- Basic Reset --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1d2b64, #f8cdda);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #222;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 20px;
+            padding: 40px;
+            width: 400px;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 1s ease;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 26px;
+            margin-bottom: 10px;
+            color: #1d2b64;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            padding: 10px;
+            border: 2px solid #1d2b64;
+            border-radius: 8px 0 0 8px;
+            outline: none;
+            width: 70%;
+            transition: 0.3s;
+        }
+
+        .search-box input:focus {
+            border-color: #f8cdda;
+        }
+
+        .search-box button {
+            padding: 10px 15px;
+            background: #1d2b64;
+            color: #fff;
+            border: none;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-box button:hover {
+            background: #263b91;
+        }
+
+        .result-card {
+            background: #fafafa;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            animation: slideUp 0.8s ease;
+        }
+
+        .result-card img {
+            width: 150px;
+            height: 100px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+        }
+
+        .result-card h2 {
+            color: #1d2b64;
+            margin-bottom: 10px;
+        }
+
+        .error {
+            color: red;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* --- Developer Footer --- */
+        footer {
+            margin-top: 25px;
+            background: #1d2b64;
+            color: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            animation: fadeIn 2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        footer span {
+            color: #f8cdda;
+            font-weight: 600;
+        }
+
+        footer a {
+            color: #f8cdda;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0; transform: scale(0.9);}
+            to {opacity: 1; transform: scale(1);}
+        }
+
+        @keyframes slideUp {
+            from {opacity: 0; transform: translateY(20px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Global Flags Explorer</h1>
+        <p class="subtitle">Type a country name to see its flag and details</p>
+
+        <div class="search-box">
+            <input type="text" id="countryInput" placeholder="Enter country name...">
+            <button id="searchBtn">Search</button>
+        </div>
+
+        <div id="result" class="result-card hidden">
+            <img id="flag" alt="Country Flag">
+            <h2 id="countryName"></h2>
+            <p><strong>Capital:</strong> <span id="capital"></span></p>
+            <p><strong>Region:</strong> <span id="region"></span></p>
+            <p><strong>Population:</strong> <span id="population"></span></p>
+        </div>
+
+        <p id="error" class="error hidden">⚠️ Country not found! Try again.</p>
+
+        <footer>
+            <p>Designed & Developed by <span>Danyal Said</span> — <a href="#">Web Developer & Learner</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const searchBtn = document.getElementById("searchBtn");
+        const countryInput = document.getElementById("countryInput");
+        const resultCard = document.getElementById("result");
+        const errorMsg = document.getElementById("error");
+
+        searchBtn.addEventListener("click", getCountryData);
+        countryInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") getCountryData();
+        });
+
+        async function getCountryData() {
+            const countryName = countryInput.value.trim();
+            if (countryName === "") return;
+
+            try {
+                const response = await fetch(`https://restcountries.com/v3.1/name/${countryName}`);
+                if (!response.ok) throw new Error("Country not found");
+
+                const data = await response.json();
+                const country = data[0];
+
+                document.getElementById("flag").src = country.flags.svg;
+                document.getElementById("countryName").textContent = country.name.common;
+                document.getElementById("capital").textContent = country.capital ? country.capital[0] : "N/A";
+                document.getElementById("region").textContent = country.region;
+                document.getElementById("population").textContent = country.population.toLocaleString();
+
+                resultCard.classList.remove("hidden");
+                errorMsg.classList.add("hidden");
+            } catch (error) {
+                resultCard.classList.add("hidden");
+                errorMsg.classList.remove("hidden");
+            }
+        }
+    </script>
+</body>
+</html>
